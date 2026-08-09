@@ -1,0 +1,216 @@
+<%- include('partials/_header') %>
+
+<div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, #1A2B52 0%, #2D5BAA 100%); color: #fff; border: none;">
+  <div class="card-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+    <h3 class="card-titulo" style="color: #fff;">📈 Resumo Gerencial - Panorama Completo</h3>
+    <div>
+      <a href="<%= info.url %>" target="_blank" class="btn-mini" style="background: rgba(255,255,255,0.15);">
+        🔗 Abrir Planilha Completa ↗
+      </a>
+    </div>
+  </div>
+  <div class="grid grid-4" style="padding: 8px 0;">
+    <div>
+      <div style="font-size: 12px; color: #B8C8EB; margin-bottom: 6px; font-weight: 500;">RECEITA TOTAL</div>
+      <div style="font-size: 28px; font-weight: 800; letter-spacing: -0.6px;"><%= formatBRL(dados.totalVendas) %></div>
+    </div>
+    <div>
+      <div style="font-size: 12px; color: #B8C8EB; margin-bottom: 6px; font-weight: 500;">CUSTOS / DESPESAS</div>
+      <div style="font-size: 28px; font-weight: 800; letter-spacing: -0.6px; color: #FFC9CB;"><%= formatBRL(dados.totalDespesas) %></div>
+    </div>
+    <div>
+      <div style="font-size: 12px; color: #B8C8EB; margin-bottom: 6px; font-weight: 500;">LUCRO DO PERÍODO</div>
+      <div style="font-size: 28px; font-weight: 800; letter-spacing: -0.6px; color: <%= dados.lucro >= 0 ? '#8EF2C7' : '#FF8A8A' %>;">
+        <%= dados.lucro >= 0 ? '+' : '' %><%= formatBRL(dados.lucro) %>
+      </div>
+    </div>
+    <div>
+      <div style="font-size: 12px; color: #B8C8EB; margin-bottom: 6px; font-weight: 500;">MARGEM DE LUCRO</div>
+      <div style="font-size: 28px; font-weight: 800; letter-spacing: -0.6px; color: #FFC87D;">
+        <%= dados.margem.toFixed(1).replace('.', ',') %>%
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom: 24px;">
+  <div class="card">
+    <div class="card-header"><h3 class="card-titulo">📊 Vendas Mensais</h3></div>
+    <div class="grafico-container" style="height: 320px;">
+      <canvas id="graficoLinha"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><h3 class="card-titulo">🥧 Receita vs Despesas vs Lucro</h3></div>
+    <div class="grafico-container" style="height: 320px;">
+      <canvas id="graficoPizza"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-3" style="margin-bottom: 24px;">
+  <div class="card">
+    <div class="card-header"><h3 class="card-titulo">💼 Folha Salarial</h3></div>
+    <div class="kpi-valor" style="color: var(--primario); font-size: 22px; margin-bottom: 6px;">
+      <%= formatBRL(dados.totalSalarios) %>
+    </div>
+    <ul class="lista-estatistica">
+      <li><span class="rotulo">Total de colaboradores</span><span class="valor"><%= dados.qtdeFuncionarios %></span></li>
+      <li><span class="rotulo">Média salarial</span><span class="valor">
+        <%= formatBRL(dados.qtdeFuncionarios > 0 ? (dados.totalSalarios / dados.qtdeFuncionarios) : 0) %>
+      </span></li>
+      <li><span class="rotulo">% das Despesas</span><span class="valor" style="color: var(--secundario);">
+        <%= dados.totalDespesas > 0 ? ((dados.totalSalarios / dados.totalDespesas) * 100).toFixed(1) : 0 %>%
+      </span></li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-header"><h3 class="card-titulo">📦 Estoque</h3></div>
+    <div class="kpi-valor" style="color: var(--sucesso); font-size: 22px; margin-bottom: 6px;">
+      <%= formatBRL(dados.totalEstoque) %>
+    </div>
+    <ul class="lista-estatistica">
+      <li><span class="rotulo">SKUs cadastrados</span><span class="valor"><%= dados.qtdeProdutos %></span></li>
+      <li><span class="rotulo">Produtos ok</span><span class="valor" style="color: var(--sucesso);">
+        <%= dados.qtdeProdutos - dados.produtosAbaixo %>
+      </span></li>
+      <li><span class="rotulo">Produtos com estoque baixo</span><span class="valor" style="color: var(--erro);">
+        ⚠️ <%= dados.produtosAbaixo %>
+      </span></li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-header"><h3 class="card-titulo">💳 Fluxo de Caixa</h3></div>
+    <ul class="lista-estatistica" style="margin-bottom: 16px;">
+      <li><span class="rotulo">Vendas aprovadas</span><span class="valor" style="color: var(--sucesso);"><%= formatBRL(dados.vendasAprovadas) %></span></li>
+      <li><span class="rotulo">Vendas pendentes</span><span class="valor" style="color: var(--aviso);"><%= formatBRL(dados.totalVendas - dados.vendasAprovadas) %></span></li>
+      <li><span class="rotulo">Despesas pagas</span><span class="valor" style="color: var(--erro);"><%= formatBRL(dados.totalDespesas - dados.despesasPendentes) %></span></li>
+      <li><span class="rotulo">Despesas pendentes</span><span class="valor" style="color: var(--secundario);"><%= formatBRL(dados.despesasPendentes) %></span></li>
+    </ul>
+    <div style="background: <%= (dados.vendasAprovadas - (dados.totalDespesas - dados.despesasPendentes)) >= 0 ? 'var(--sucesso-claro)' : 'var(--erro-claro)' %>; padding: 14px; border-radius: 12px;">
+      <small style="font-weight: 600; color: <%= (dados.vendasAprovadas - (dados.totalDespesas - dados.despesasPendentes)) >= 0 ? 'var(--sucesso)' : 'var(--erro)' %>">
+        SALDO ATUAL (realizado)
+      </small>
+      <div style="font-size: 20px; font-weight: 800; color: <%= (dados.vendasAprovadas - (dados.totalDespesas - dados.despesasPendentes)) >= 0 ? 'var(--sucesso)' : 'var(--erro)' %>; margin-top: 4px;">
+        <%= formatBRL(dados.vendasAprovadas - (dados.totalDespesas - dados.despesasPendentes)) %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><h3 class="card-titulo">👥 Equipe de Funcionários da NovaTech</h3></div>
+  <div class="table-wrapper">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Nome</th><th>Cargo</th><th>Departamento</th><th>Admissão</th>
+          <th class="numero">Salário + Benefícios</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% (dados.funcionarios || []).forEach(f => { %>
+          <tr>
+            <td><b><%= f[1] %></b><br><small style="color: var(--texto-claro);"><%= f[10] %></small></td>
+            <td><%= f[2] %></td>
+            <td><span class="badge badge-eletronicos"><%= f[3] %></span></td>
+            <td><%= f[4] %></td>
+            <td class="numero" style="font-weight: 700; color: var(--sucesso);">
+              <%= typeof f[9] === 'number' ? formatBRL(f[9]) : f[9] %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const mesesVindos = <%- JSON.stringify(dados.vendasPorMes || {}) %>;
+  const todosMeses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const valores = todosMeses.map(m => mesesVindos[m] || 0);
+
+  const ctxLinha = document.getElementById('graficoLinha');
+  if (ctxLinha) {
+    new Chart(ctxLinha, {
+      type: 'line',
+      data: {
+        labels: todosMeses,
+        datasets: [{
+          label: 'Vendas (R$)',
+          data: valores,
+          borderColor: '#E86A2B',
+          backgroundColor: (context) => {
+            const chart = context.chart;
+            const {ctx, chartArea} = chart;
+            if (!chartArea) return 'rgba(232,106,43,0.1)';
+            const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            g.addColorStop(0, 'rgba(232,106,43,0.35)');
+            g.addColorStop(1, 'rgba(232,106,43,0.02)');
+            return g;
+          },
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3,
+          pointBackgroundColor: '#2D5BAA',
+          pointRadius: 4,
+          pointBorderWidth: 2,
+          pointBorderColor: '#fff',
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1A2B52', padding: 12, cornerRadius: 10,
+            callbacks: {
+              label: c => 'R$ ' + Number(c.parsed.y).toLocaleString('pt-BR', {minimumFractionDigits: 2})
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#64748B' } },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(226,232,240,0.7)' },
+            ticks: { color: '#64748B', callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' }
+          }
+        }
+      }
+    });
+  }
+
+  const ctxPizza = document.getElementById('graficoPizza');
+  if (ctxPizza) {
+    new Chart(ctxPizza, {
+      type: 'doughnut',
+      data: {
+        labels: ['Vendas', 'Despesas', 'Lucro'],
+        datasets: [{
+          data: [dados.totalVendas, dados.totalDespesas, Math.max(dados.lucro, 0)],
+          backgroundColor: ['#22A06B', '#D14343', '#2D5BAA'],
+          borderColor: '#fff',
+          borderWidth: 4,
+          hoverOffset: 10,
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+          legend: { position: 'bottom', labels: { padding: 18, font: { size: 13, weight: 600 }, usePointStyle: true, pointStyle: 'rectRounded' } },
+          tooltip: {
+            backgroundColor: '#1A2B52', padding: 12, cornerRadius: 10,
+            callbacks: {
+              label: c => c.label + ': R$ ' + Number(c.parsed).toLocaleString('pt-BR', {minimumFractionDigits: 2})
+            }
+          }
+        }
+      }
+    });
+  }
+</script>
+
+<%- include('partials/_footer') %>

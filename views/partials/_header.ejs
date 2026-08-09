@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= titulo || 'NovaTech Soluções' %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <%- include('_sidebar') %>
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-esq">
+          <h1 class="titulo-pagina"><%= titulo %></h1>
+        </div>
+        <div class="topbar-dir">
+          <div class="data-hora">
+            <span class="data-icon">📅</span>
+            <span id="dataAtual"></span>
+          </div>
+          <div class="user-chip">
+            <div class="avatar">ADM</div>
+            <span>Administrador</span>
+          </div>
+        </div>
+      </header>
+      <div class="page-content">

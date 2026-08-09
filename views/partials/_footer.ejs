@@ -1,0 +1,14 @@
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const el = document.getElementById('dataAtual');
+    if (el) {
+      el.textContent = new Date().toLocaleDateString('pt-BR', {
+        weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+      });
+    }
+  </script>
+</body>
+</html>

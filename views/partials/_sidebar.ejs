@@ -1,0 +1,51 @@
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">NT</div>
+    <div class="logo-text">
+      <h3>NovaTech</h3>
+      <span>Soluções</span>
+    </div>
+  </div>
+
+  <nav class="menu">
+    <a href="/" class="menu-item <%= menuAtivo === '/' ? 'ativo' : '' %>">
+      <span class="icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+    <a href="/funcionarios" class="menu-item <%= menuAtivo === '/funcionarios' ? 'ativo' : '' %>">
+      <span class="icon">👥</span>
+      <span>Funcionários</span>
+    </a>
+    <a href="/vendas" class="menu-item <%= menuAtivo === '/vendas' ? 'ativo' : '' %>">
+      <span class="icon">💰</span>
+      <span>Vendas</span>
+    </a>
+    <a href="/despesas" class="menu-item <%= menuAtivo === '/despesas' ? 'ativo' : '' %>">
+      <span class="icon">💸</span>
+      <span>Despesas</span>
+    </a>
+    <a href="/estoque" class="menu-item <%= menuAtivo === '/estoque' ? 'ativo' : '' %>">
+      <span class="icon">📦</span>
+      <span>Estoque</span>
+    </a>
+    <a href="/resumo" class="menu-item <%= menuAtivo === '/resumo' ? 'ativo' : '' %>">
+      <span class="icon">📈</span>
+      <span>Resumo Gerencial</span>
+    </a>
+  </nav>
+
+  <% if(typeof info !== 'undefined' && info) { %>
+  <div class="sidebar-footer">
+    <div class="planilha-info">
+      <div class="planilha-icon">📋</div>
+      <div class="planilha-dados">
+        <strong>Planilha conectada</strong>
+        <small><%= info.nome %></small>
+        <a href="<%= info.url %>" target="_blank" class="btn-mini">
+          Abrir ↗
+        </a>
+      </div>
+    </div>
+  </div>
+  <% } %>
+</aside>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaTech Soluções - Configuração Inicial</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="setup-page">
+  <div class="setup-box">
+    <div class="setup-header">
+      <div class="setup-logo">NT</div>
+      <h1>NovaTech Soluções</h1>
+      <p>Sistema de Gestão Empresarial Integrado com Google Sheets</p>
+    </div>
+
+    <div class="setup-body">
+      <% if(erro) { %>
+        <div class="alert alert-erro">
+          <span>⚠️</span>
+          <span><b>Erro:</b> <%= erro %>. Verifique se o arquivo <code>credenciais.json</code> está na pasta correta e se as APIs estão ativadas no Google Cloud.</span>
+        </div>
+      <% } %>
+
+      <p class="setup-desc">
+        Bem-vindo! Antes de começar, vamos criar automaticamente uma planilha completa no Google Sheets 
+        com todas as abas, fórmulas e indicadores financeiros para a sua empresa fictícia.
+      </p>
+
+      <div class="alert alert-aviso">
+        <span>📌</span>
+        <div>
+          <b>Importante:</b> Certifique-se de compartilhar a planilha criada com o email de serviço
+          do seu arquivo <code>credenciais.json</code> para poder editar! (O email está no campo "client_email" do JSON).
+        </div>
+      </div>
+
+      <h3 style="margin-bottom: 16px; font-size: 15px;">⚙️ O que será criado:</h3>
+
+      <div class="passo-item">
+        <div class="passo-num">1</div>
+        <div class="passo-texto">
+          <strong>Planilha principal</strong>
+          <span>Nova planilha com nome personalizado e 5 abas</span>
+        </div>
+      </div>
+      <div class="passo-item">
+        <div class="passo-num">2</div>
+        <div class="passo-texto">
+          <strong>Abas Funcionários, Vendas, Despesas e Estoque</strong>
+          <span>Com cabeçalhos formatados e fórmulas automáticas</span>
+        </div>
+      </div>
+      <div class="passo-item">
+        <div class="passo-num">3</div>
+        <div class="passo-texto">
+          <strong>Resumo Gerencial + Indicadores</strong>
+          <span>Dashboard com totalizadores, lucro e margem de lucro</span>
+        </div>
+      </div>
+      <div class="passo-item">
+        <div class="passo-num">4</div>
+        <div class="passo-texto">
+          <strong>Dados de exemplo reais</strong>
+          <span>5 funcionários, 12 vendas, 12 despesas e 10 produtos em estoque</span>
+        </div>
+      </div>
+
+      <form action="/criar-planilha" method="POST" style="margin-top: 26px;">
+        <div class="form-group">
+          <label class="form-label">Nome da planilha <span class="obrigatorio">*</span></label>
+          <input type="text" name="nome" class="form-input"
+                 value="NovaTech Soluções - Gestão" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="padding: 14px; font-size: 15px;">
+          🚀 Criar Planilha e Iniciar Sistema
+        </button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

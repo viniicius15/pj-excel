@@ -1,0 +1,289 @@
+<%- include('partials/_header') %>
+
+<% if (criada) { %>
+<div class="mensagem-flash">
+  ✅ Planilha criada com sucesso! Todos os dados de exemplo já foram carregados.
+  <a href="<%= info.url %>" target="_blank" style="margin-left: auto; color: var(--sucesso); font-weight: 700; text-decoration: none;">Abrir planilha ↗</a>
+</div>
+
+<% } %>
+
+<div class="grid grid-4" style="margin-bottom: 24px;">
+  <div class="kpi-card kpi-vendas">
+    <div class="kpi-top">
+      <span class="kpi-label">Total de Vendas</span>
+      <div class="kpi-icon">💰</div>
+    </div>
+    <div class="kpi-valor"><%= formatBRL(dados.totalVendas) %></div>
+    <div class="kpi-sub">
+      <%= dados.qtdeVendas %> vendas realizadas
+      <span class="tag tag-positivo">+ Aprovado: <%= formatBRL(dados.vendasAprovadas) %></span>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-despesas">
+    <div class="kpi-top">
+      <span class="kpi-label">Total de Despesas</span>
+      <div class="kpi-icon">💸</div>
+    </div>
+    <div class="kpi-valor"><%= formatBRL(dados.totalDespesas) %></div>
+    <div class="kpi-sub">
+      Folha salarial: <%= formatBRL(dados.totalSalarios) %>
+      <span class="tag tag-aviso">Pendentes: <%= formatBRL(dados.despesasPendentes) %></span>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-lucro">
+    <div class="kpi-top">
+      <span class="kpi-label">Lucro Bruto</span>
+      <div class="kpi-icon">📈</div>
+    </div>
+    <div class="kpi-valor"><%= formatBRL(dados.lucro) %></div>
+    <div class="kpi-sub">
+      <%= dados.funcionarios.length %> colaboradores
+      <span class="tag <%= dados.lucro >= 0 ? 'tag-positivo' : 'tag-negativo' %>">
+        <%= dados.lucro >= 0 ? '▲ Lucrativo' : '▼ Prejuízo' %>
+      </span>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-margem">
+    <div class="kpi-top">
+      <span class="kpi-label">Margem de Lucro</span>
+      <div class="kpi-icon">🎯</div>
+    </div>
+    <div class="kpi-valor"><%= dados.margem.toFixed(1).replace('.', ',') %>%</div>
+    <div class="kpi-sub">
+      <%= dados.qtdeProdutos %> produtos em estoque
+      <span class="tag <%= dados.produtosAbaixo > 0 ? 'tag-negativo' : 'tag-positivo' %>">
+        <%= dados.produtosAbaixo %> abaixo do mínimo
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-3" style="margin-bottom: 24px;">
+  <div class="card" style="grid-column: span 2;">
+    <div class="card-header">
+      <h3 class="card-titulo">📊 Vendas Mensais</h3>
+      <span class="tag tag-info">Gráfico Interativo</span>
+    </div>
+    <div class="grafico-container">
+      <canvas id="graficoVendas"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-titulo">🏆 Vendas por Vendedor</h3>
+    </div>
+    <ul class="lista-estatistica">
+      <% 
+      const vendedoresOrdenados = Object.entries(dados.vendasPorVendedor || {})
+        .sort((a,b) => b[1] - a[1])
+        .slice(0, 6); 
+      %>
+      <% vendedoresOrdenados.forEach(([nome, valor]) => { %>
+        <li>
+          <span class="rotulo">🔹 <%= nome.split(' ')[0] %></span>
+          <span class="valor" style="color: var(--sucesso);"><%= formatBRL(valor) %></span>
+        </li>
+      <% }) %>
+      <% if(vendedoresOrdenados.length === 0) { %>
+        <li><span class="rotulo">Sem dados ainda</span></li>
+      <% } %>
+    </ul>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom: 24px;">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-titulo">⭐ Top 5 Maiores Vendas</h3>
+      <a href="/vendas" class="btn btn-sm btn-secondary">Ver todas →</a>
+    </div>
+    <div class="table-wrapper">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Nº</th>
+            <th>Cliente</th>
+            <th>Vendedor</th>
+            <th class="texto-centro">Status</th>
+            <th class="numero">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% dados.topVendas.forEach(v => { %>
+            <tr>
+              <td>#<%= v[0] %></td>
+              <td><%= v[3] %></td>
+              <td><%= (v[2] || '').split(' ')[0] %></td>
+              <td class="texto-centro">
+                <span class="badge badge-<%= (v[12] || 'pendente').toLowerCase() %>"><%= v[12] %></span>
+              </td>
+              <td class="numero" style="color: var(--sucesso);"><%= typeof v[11] === 'number' ? formatBRL(v[11]) : v[11] %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-titulo">📦 Produtos com Estoque Baixo</h3>
+      <a href="/estoque" class="btn btn-sm btn-secondary">Estoque completo →</a>
+    </div>
+    <div class="table-wrapper">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th class="numero">Qtd</th>
+            <th class="numero">Mínimo</th>
+            <th class="texto-centro">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%
+          const baixoEstoque = (dados.estoqueDados || [])
+            .filter(p => p[10] === 'Abaixo do mínimo')
+            .slice(0, 5);
+          if(baixoEstoque.length > 0) {
+            baixoEstoque.forEach(p => { %>
+            <tr>
+              <td><%= p[1] %></td>
+              <td class="numero"><%= p[8] %></td>
+              <td class="numero"><%= p[7] %></td>
+              <td class="texto-centro"><span class="badge badge-abaixo">Crítico</span></td>
+            </tr>
+          <% }); } else { %>
+            <tr><td colspan="4" class="texto-centro" style="padding: 24px; color: var(--sucesso);">✅ Nenhum produto com estoque baixo!</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-titulo">💼 Últimas Vendas</h3>
+    </div>
+    <div class="table-wrapper">
+      <table class="tabela">
+        <thead>
+          <tr><th>Data</th><th>Cliente</th><th class="numero">Total</th><th class="texto-centro">Status</th></tr>
+        </thead>
+        <tbody>
+          <% dados.vendasRecentes.forEach(v => { %>
+            <tr>
+              <td><%= v[1] %></td>
+              <td><%= v[3] %></td>
+              <td class="numero" style="color: var(--sucesso);"><%= typeof v[11] === 'number' ? formatBRL(v[11]) : v[11] %></td>
+              <td class="texto-centro">
+                <span class="badge badge-<%= (v[12] || 'pendente').toLowerCase() %>"><%= v[12] %></span>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-titulo">📝 Últimas Despesas</h3>
+    </div>
+    <div class="table-wrapper">
+      <table class="tabela">
+        <thead>
+          <tr><th>Data</th><th>Categoria</th><th class="numero">Valor</th><th class="texto-centro">Status</th></tr>
+        </thead>
+        <tbody>
+          <% dados.despesasRecentes.forEach(d => { %>
+            <tr>
+              <td><%= d[1] %></td>
+              <td><%= d[2] %></td>
+              <td class="numero" style="color: var(--erro);"><%= typeof d[5] === 'number' ? formatBRL(d[5]) : d[5] %></td>
+              <td class="texto-centro">
+                <span class="badge badge-<%= (d[6] || 'pendente').toLowerCase() %>"><%= d[6] %></span>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ctx = document.getElementById('graficoVendas');
+  if (ctx) {
+    const mesesVindos = <%- JSON.stringify(dados.vendasPorMes || {}) %>;
+    const todosMeses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const dataValores = todosMeses.map(m => mesesVindos[m] || 0);
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: todosMeses,
+        datasets: [{
+          label: 'Total de Vendas (R$)',
+          data: dataValores,
+          backgroundColor: function(context) {
+            const chart = context.chart;
+            const {ctx, chartArea} = chart;
+            if (!chartArea) return '#2D5BAA';
+            const grad = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+            grad.addColorStop(0, 'rgba(45, 91, 170, 0.35)');
+            grad.addColorStop(1, 'rgba(232, 106, 43, 0.85)');
+            return grad;
+          },
+          borderRadius: 10,
+          borderSkipped: false,
+          borderWidth: 2,
+          borderColor: 'rgba(232, 106, 43, 0.6)',
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1A2B52',
+            padding: 12,
+            titleFont: { size: 14 },
+            bodyFont: { size: 13 },
+            cornerRadius: 10,
+            callbacks: {
+              label: function(context) {
+                return 'R$ ' + Number(context.parsed.y).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 12 }, color: '#64748B' }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(226, 232, 240, 0.7)', drawBorder: false },
+            ticks: {
+              font: { size: 12 },
+              color: '#64748B',
+              callback: function(v) { return 'R$ ' + (v/1000).toFixed(0) + 'k'; }
+            }
+          }
+        }
+      }
+    });
+  }
+</script>
+
+<%- include('partials/_footer') %>

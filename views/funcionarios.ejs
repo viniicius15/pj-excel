@@ -1,0 +1,135 @@
+<%- include('partials/_header') %>
+
+<% if(mensagem) { %>
+  <div class="mensagem-flash">✅ <%= mensagem %></div>
+<% } %>
+
+<div class="grid grid-3" style="margin-bottom: 24px;">
+  <div class="card">
+    <div class="card-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">
+      <h3 class="card-titulo">👥 Total de Colaboradores</h3>
+    </div>
+    <div class="kpi-valor" style="color: var(--primario);"><%= dados.length %></div>
+  </div>
+  <div class="card">
+    <div class="card-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">
+      <h3 class="card-titulo">💼 Departamentos</h3>
+    </div>
+    <div class="kpi-valor" style="color: var(--secundario);">
+      <%= new Set(dados.map(d => d[3])).size %>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">
+      <h3 class="card-titulo">💰 Folha Salarial</h3>
+    </div>
+    <div class="kpi-valor" style="color: var(--sucesso);">
+      <%= formatBRL(dados.reduce((s, d) => s + (Number(String(d[9]||'0').replace(/[^\d.,-]/g,'').replace(',','.')) || 0), 0)) %>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-3" style="align-items: start;">
+  <div class="card" style="grid-column: span 1;">
+    <div class="card-header">
+      <h3 class="card-titulo">➕ Novo Funcionário</h3>
+    </div>
+    <form action="/funcionarios/novo" method="POST">
+      <div class="form-group">
+        <label class="form-label">ID <span class="obrigatorio">*</span></label>
+        <input type="number" name="id" class="form-input" required value="<%= 150 + dados.length %>">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nome Completo <span class="obrigatorio">*</span></label>
+        <input type="text" name="nome" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cargo <span class="obrigatorio">*</span></label>
+        <input type="text" name="cargo" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Departamento <span class="obrigatorio">*</span></label>
+        <select name="departamento" class="form-select" required>
+          <option>Diretoria</option>
+          <option>Financeiro</option>
+          <option>Vendas</option>
+          <option>Recursos Humanos</option>
+          <option>TI</option>
+          <option>Administrativo</option>
+          <option>Operações</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data de Admissão</label>
+        <input type="text" name="data_admissao" class="form-input" placeholder="DD/MM/AAAA"
+               value="<%= new Date().toLocaleDateString('pt-BR') %>">
+      </div>
+      <div class="grid grid-2">
+        <div class="form-group">
+          <label class="form-label">Salário Base (R$)</label>
+          <input type="number" name="salario" step="0.01" min="0" class="form-input" value="3000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vale Transporte</label>
+          <input type="number" name="vt" step="0.01" min="0" class="form-input" value="300">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vale Refeição</label>
+          <input type="number" name="vr" step="0.01" min="0" class="form-input" value="500">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Outros Benefícios</label>
+          <input type="number" name="beneficios" step="0.01" min="0" class="form-input" value="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" name="email" class="form-input" placeholder="nome@novatechsolucoes.com.br">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefone</label>
+        <input type="text" name="telefone" class="form-input" placeholder="(11) 99999-0000">
+      </div>
+      <button type="submit" class="btn btn-success btn-block">
+        💾 Salvar Funcionário
+      </button>
+    </form>
+  </div>
+
+  <div class="card" style="grid-column: span 2;">
+    <div class="card-header">
+      <h3 class="card-titulo">📋 Lista de Funcionários</h3>
+      <span class="tag tag-info"><%= dados.length %> registros</span>
+    </div>
+    <div class="table-wrapper">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Cargo</th>
+            <th>Departamento</th>
+            <th>Admissão</th>
+            <th class="numero">Salário Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% dados.forEach((d, i) => { %>
+            <tr>
+              <td><%= d[0] %></td>
+              <td><b><%= d[1] %></b><br><small style="color: var(--texto-claro);"><%= d[10] || '' %></small></td>
+              <td><%= d[2] %></td>
+              <td><span class="badge badge-eletronicos"><%= d[3] %></span></td>
+              <td><%= d[4] %></td>
+              <td class="numero" style="color: var(--sucesso); font-weight: 700;">
+                <%= typeof d[9] === 'number' ? formatBRL(d[9]) : d[9] %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/_footer') %>

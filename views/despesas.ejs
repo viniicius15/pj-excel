@@ -1,0 +1,170 @@
+<%- include('partials/_header') %>
+
+<% if(mensagem) { %>
+  <div class="mensagem-flash">✅ <%= mensagem %></div>
+<% } %>
+
+<%
+  const toNum = v => parseFloat(String(v||'0').replace(/[^\d.,-]/g,'').replace(',','.')) || 0;
+  const total = dados.reduce((s,d) => s + toNum(d[5]), 0);
+  const pagas = dados.filter(d => d[6] === 'Pago').reduce((s,d) => s + toNum(d[5]), 0);
+  const pendentes = total - pagas;
+  const categorias = {};
+  dados.forEach(d => { const c = d[2] || 'Outros'; categorias[c] = (categorias[c] || 0) + toNum(d[5]); });
+%>
+
+<div class="grid grid-3" style="margin-bottom: 24px;">
+  <div class="kpi-card kpi-despesas">
+    <div class="kpi-top"><span class="kpi-label">Total de Despesas</span><div class="kpi-icon">💸</div></div>
+    <div class="kpi-valor"><%= formatBRL(total) %></div>
+    <div class="kpi-sub"><%= dados.length %> lançamentos</div>
+  </div>
+  <div class="card">
+    <div class="card-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">
+      <h3 class="card-titulo">✅ Pagas</h3>
+    </div>
+    <div class="kpi-valor" style="color: var(--sucesso);"><%= formatBRL(pagas) %></div>
+    <div class="kpi-sub" style="color: var(--texto-claro);">
+      <%= total > 0 ? ((pagas / total) * 100).toFixed(0) : 0 %>% do total
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">
+      <h3 class="card-titulo">⏳ Pendentes</h3>
+    </div>
+    <div class="kpi-valor" style="color: var(--aviso);"><%= formatBRL(pendentes) %></div>
+    <div class="kpi-sub" style="color: var(--texto-claro);">
+      <%= total > 0 ? ((pendentes / total) * 100).toFixed(0) : 0 %>% do total
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-3" style="margin-bottom: 24px;">
+  <div class="card">
+    <div class="card-header"><h3 class="card-titulo">📂 Despesas por Categoria</h3></div>
+    <ul class="lista-estatistica">
+      <% Object.entries(categorias).sort((a,b) => b[1]-a[1]).slice(0, 6).forEach(([cat, val]) => { %>
+        <li>
+          <span class="rotulo">🔹 <%= cat %></span>
+          <span class="valor" style="color: var(--erro);"><%= formatBRL(val) %></span>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+  <div class="card" style="grid-column: span 2;">
+    <div class="card-header"><h3 class="card-titulo">➕ Nova Despesa</h3></div>
+    <form action="/despesas/novo" method="POST">
+      <div class="grid grid-2">
+        <div class="form-group">
+          <label class="form-label">Nº Despesa *</label>
+          <input type="number" name="numero" class="form-input" required value="<%= 2050 + dados.length %>">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data *</label>
+          <input type="text" name="data" class="form-input" required
+                 value="<%= new Date().toLocaleDateString('pt-BR') %>">
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="form-group">
+          <label class="form-label">Categoria *</label>
+          <select name="categoria" class="form-select" required>
+            <option>Aluguel</option><option>Energia Elétrica</option>
+            <option>Internet/Telefonia</option><option>Marketing Digital</option>
+            <option>Fornecedores</option><option>Salários</option>
+            <option>Software</option><option>Manutenção</option>
+            <option>Viagem</option><option>Treinamento</option>
+            <option>Seguros</option><option>Outros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fornecedor *</label>
+          <input type="text" name="fornecedor" class="form-input" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição *</label>
+        <input type="text" name="descricao" class="form-input" required>
+      </div>
+      <div class="grid grid-3">
+        <div class="form-group">
+          <label class="form-label">Valor (R$) *</label>
+          <input type="number" name="valor" step="0.01" min="0" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option>Pago</option><option>Pendente</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pagamento</label>
+          <select name="pagamento" class="form-select">
+            <option>Boleto</option><option>PIX</option><option>Transferência</option>
+            <option>Cartão Crédito</option><option>Débito Automático</option><option>Dinheiro</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="form-group">
+          <label class="form-label">Responsável</label>
+          <select name="responsavel" class="form-select">
+            <option>Carlos Henrique Novaes</option>
+            <option>Mariana Silva Santos</option>
+            <option>João Paulo Ferreira</option>
+            <option>Ana Beatriz Costa</option>
+            <option>Pedro Lucas Almeida</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Observações</label>
+          <input type="text" name="observacoes" class="form-input">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-warning btn-block">💾 Registrar Despesa</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-titulo">📋 Histórico de Despesas</h3>
+    <span class="tag tag-info"><%= dados.length %> lançamentos</span>
+  </div>
+  <div class="table-wrapper">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Nº</th>
+          <th>Data</th>
+          <th>Categoria</th>
+          <th>Fornecedor</th>
+          <th>Descrição</th>
+          <th class="numero">Valor</th>
+          <th class="texto-centro">Status</th>
+          <th>Responsável</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% dados.slice().reverse().forEach(d => { %>
+          <tr>
+            <td><b>#<%= d[0] %></b></td>
+            <td><%= d[1] %></td>
+            <td><span class="badge badge-aviso"><%= d[2] %></span></td>
+            <td><%= d[3] %></td>
+            <td><%= d[4] %></td>
+            <td class="numero" style="color: var(--erro); font-weight: 700;">
+              <%= typeof d[5] === 'number' ? formatBRL(d[5]) : d[5] %>
+            </td>
+            <td class="texto-centro">
+              <span class="badge badge-<%= (d[6]||'pendente').toLowerCase() %>"><%= d[6] %></span>
+            </td>
+            <td><%= (d[8]||'').split(' ')[0] %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('partials/_footer') %>
